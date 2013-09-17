@@ -1,0 +1,34 @@
+* Version 1.2.7 beta
+    * fixed: parse multi tracker_server config error.
+    * fixed: received data size smaller than expected.
+* Version 1.2.6 beta
+    * Implemented sendfile transmit files, add 'by file' interface for all upload request.
+	* fixed: upload_by_buffer file_ext_name error.
+	* fixed: only one tracker server in client configure file, error occurred.
+* Version 1.2.5
+    * download function add two arguments: offset and down_bytes, default is 0.
+	* change some variables from int to long.
+* Version 1.2.4 beta
+    * Create tracker pool move into class client, improve utilization tracker pool.
+	* Implemented Modify file
+	* Implemented Truncate file
+	* Implemented List all groups information
+* Version 1.2.1 beta
+	* fixed: raise exception when fdfs_test.py has no options.
+	* flush to disk while received 4K data each in download to file.
+* Version 1.2.0 beta
+  	* Catch status return from server, show errors clear.
+	* Implemented Upload slave file to store
+	* Implemented Upload append file to store
+	* Implemented append remote file
+	* Implemented set/get meta data
+* Version 1.1.0 beta
+	* fix bug
+	* Implemented list group information
+	* Implemented list storage servers information in a group
+* Version 1.0.0 beta first release
+    * Implemented Upload file to store
+    * Implemented Upload buffer to store
+    * Implemented Download file to local file from store
+    * Implemented Download file to local buffer from store
+    * Implemented Delete file in store
