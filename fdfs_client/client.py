@@ -365,7 +365,7 @@ class Fdfs_client(object):
         if not down_bytes:
             download_bytes = long(down_bytes)
         tc = Tracker_client(self.tracker_pool)
-        store_serv = tc.tracker_query_storage_stor_with_group(group_name)
+        store_serv = tc.tracker_query_storage_fetch(group_name, remote_filename)
         store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
         return store.storage_download_to_file(tc, store_serv, local_filename, \
                                               file_offset, download_bytes, \
@@ -394,7 +394,7 @@ class Fdfs_client(object):
         if not down_bytes:
             download_bytes = long(down_bytes)
         tc = Tracker_client(self.tracker_pool)
-        store_serv = tc.tracker_query_storage_stor_with_group(group_name)
+        store_serv = tc.tracker_query_storage_fetch(group_name, remote_filename)
         store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
         file_buffer = None
         return store.storage_download_to_buffer(tc, store_serv, file_buffer, \
