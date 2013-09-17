@@ -11,10 +11,10 @@ The Python interface to the Fastdfs Ver 4.06.
 	2. instantiate class Fdfs_client
 	3. call memeber functions
 
-    >>>from fdfs_client.client import *
-    >>>client = Fdfs_client('/etc/fdfs/client.conf')
-    >>>ret = client.upload_by_filename('test')
-	>>>ret
+    >>> from fdfs_client.client import *
+    >>> client = Fdfs_client('/etc/fdfs/client.conf')
+    >>> ret = client.upload_by_filename('test')
+	>>> ret
 	{'Group name':'group1','Status':'Upload successed.', 'Remote file_id':'group1/M00/00/00/
     	wKjzh0_xaR63RExnAAAaDqbNk5E1398.py','Uploaded size':'6.0KB','Local file name':'test'
 		, 'Storage IP':'192.168.243.133'}
@@ -324,6 +324,7 @@ Author
 ------
 
 fdfs_client-py is developed and maintained by scott yuan (scottzer8@gmail.com)
+
 fdfs_client-py is bug fixed and maintained by hay86
 
 It can be found here: http://github.com/hay86/fdfs_client-py
