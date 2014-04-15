@@ -337,7 +337,7 @@ class Fdfs_client(object):
             raise DataError('[-] Error: remote_file_id is invalid.(in delete file)')
         group_name, remote_filename = tmp
         tc = Tracker_client(self.tracker_pool)
-        store_serv = tc.tracker_query_storage_stor_with_group(group_name)
+        store_serv = tc.tracker_query_storage_update(group_name, remote_filename)
         store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
         return store.storage_delete_file(tc, store_serv, remote_filename)
 
