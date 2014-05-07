@@ -36,6 +36,7 @@ def parse_storage_status(status_code):
 class Storage_info(object):
     def __init__(self):
         self.status = 0
+        self.id = ''
         self.ip_addr = ''
         self.domain_name = ''
         self.src_ip_addr = ''
@@ -94,13 +95,14 @@ class Storage_info(object):
         self.last_heartbeat_time = datetime.fromtimestamp(0).isoformat()
         self.if_trunk_server = 0
         #fmt = |-status(1)-ipaddr(16)-domain(128)-srcipaddr(16)-ver(6)-52*8-|
-        self.fmt = '!B %ds %ds %ds %ds 52QB' % (IP_ADDRESS_SIZE, \
-                                               FDFS_DOMAIN_NAME_MAX_LEN,
+        self.fmt = '!B %ds %ds %ds %ds %ds 52QB' % (FDFS_STORAGE_ID_MAX_SIZE, \
+                                               IP_ADDRESS_SIZE, \
+                                               FDFS_DOMAIN_NAME_MAX_LEN, \
                                                IP_ADDRESS_SIZE, \
                                            FDFS_VERSION_SIZE)
 
     def set_info(self, bytes_stream):
-        (self.status, ip_addr, domain_name, \
+        (self.status, id, ip_addr, domain_name, \
          src_ip_addr, version, join_time,up_time, \
          totalMB, freeMB, self.upload_prio, \
          self.store_path_count, self.subdir_count_per_path, \
@@ -129,6 +131,7 @@ class Storage_info(object):
          last_heartbeat_time, self.if_trunk_server) \
           = struct.unpack(self.fmt, bytes_stream)
         try:
+            self.id = id.strip('\x00')
             self.ip_addr = ip_addr.strip('\x00')
             self.domain_name = domain_name.strip('\x00')
             self.version = version.strip('\x00')
@@ -150,6 +153,7 @@ class Storage_info(object):
         '''Transform to readable string.'''
         
         s  = 'Storage information:\n'
+        s += '\tid = %s\n' % (self.id)
         s += '\tip_addr = %s (%s)\n' % (self.ip_addr, parse_storage_status(self.status))
         s += '\thttp domain = %s\n' % self.domain_name
         s += '\tversion = %s\n' % self.version
@@ -215,6 +219,7 @@ class Storage_info(object):
 class Group_info(object):
     def __init__(self):
         self.group_name            = ''
+        self.totalMB               = ''
         self.freeMB                = ''
         self.trunk_freeMB          = ''
         self.count                 = 0
@@ -225,13 +230,14 @@ class Group_info(object):
         self.store_path_count      = 0
         self.subdir_count_per_path = 0
         self.curr_trunk_file_id    = 0
-        self.fmt                   = '!%ds 10Q' % (FDFS_GROUP_NAME_MAX_LEN + 1)
+        self.fmt                   = '!%ds 11Q' % (FDFS_GROUP_NAME_MAX_LEN + 1)
         return None
 
     def __str__(self):
 
         s = 'Group information:\n'
         s += '\tgroup name = %s\n' % self.group_name
+        s += '\tdisk total space = %s\n' % self.totalMB
         s += '\tdisk free space = %s\n' % self.freeMB
         s += '\ttrunk free space = %s\n' % self.trunk_freeMB
         s += '\tstorage server count = %d\n' % self.count
@@ -245,12 +251,13 @@ class Group_info(object):
         return s
 
     def set_info(self, bytes_stream):
-        (group_name, freeMB, trunk_freeMB, self.count, self.storage_port, \
+        (group_name, totalMB, freeMB, trunk_freeMB, self.count, self.storage_port, \
          self.store_http_port, self.active_count, self.curr_write_server, \
          self.store_path_count, self.subdir_count_per_path, self.curr_trunk_file_id) \
         = struct.unpack(self.fmt, bytes_stream)
         try:
             self.group_name = group_name.strip('\x00')
+            self.totalMB = appromix(totalMB, FDFS_SPACE_SIZE_BASE_INDEX)
             self.freeMB = appromix(freeMB, FDFS_SPACE_SIZE_BASE_INDEX)
             self.trunk_freeMB = appromix(trunk_freeMB, FDFS_SPACE_SIZE_BASE_INDEX)
         except ValueError:
@@ -295,6 +302,7 @@ class Tracker_client(object):
                                    % (th.pkg_len, recv_size)
                 raise ResponseError(errinfo)
         except ConnectionError:
+            conn.disconnect()
             raise
         finally:
             self.pool.release(conn)
@@ -330,6 +338,7 @@ class Tracker_client(object):
             group_info = Group_info()
             group_info.set_info(recv_buffer)
         except ConnectionError:
+            conn.disconnect()
             raise
         finally:
             self.pool.release(conn)
@@ -345,7 +354,8 @@ class Tracker_client(object):
             if th.status != 0:
                 raise DataError('[-] Error: %d, %s' % (th.status, os.strerror(th.status)))
             recv_buffer, recv_size = tcp_recv_response(conn, th.pkg_len)
-        except:
+        except ConnectionError:
+            conn.disconnect()
             raise
         finally:
             self.pool.release(conn)
@@ -387,6 +397,7 @@ class Tracker_client(object):
                          % (TRACKER_QUERY_STORAGE_STORE_BODY_LEN, recv_size)
                 raise ResponseError(errmsg)
         except ConnectionError:
+            conn.disconnect()
             raise
         finally:
             self.pool.release(conn)
@@ -424,6 +435,7 @@ class Tracker_client(object):
                             % (TRACKER_QUERY_STORAGE_STORE_BODY_LEN, recv_size)
                 raise ResponseError(errmsg)
         except ConnectionError:
+            conn.disconnect()
             raise
         finally:
             self.pool.release(conn)
@@ -465,6 +477,7 @@ class Tracker_client(object):
                 errmsg += 'expect: %d, actual: %d' % (th.pkg_len, recv_size)
                 raise ResponseError(errmsg)
         except ConnectionError:
+            conn.disconnect()
             raise
         finally:
             self.pool.release(conn)

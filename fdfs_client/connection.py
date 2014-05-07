@@ -22,7 +22,7 @@ class Connection(object):
     def __init__(self, **conn_kwargs):
         self.pid = os.getpid()
         self.host_tuple = conn_kwargs['host_tuple']
-        self.remote_port = conn_kwargs['port']
+        self.remote_port = None
         self.remote_addr = None
         self.timeout = conn_kwargs['timeout']
         self._sock = None
@@ -45,10 +45,18 @@ class Connection(object):
         #print '[+] Create a connection success.'
         #print '\tLocal address is %s:%s.' % self._sock.getsockname()
         #print '\tRemote address is %s:%s' % (self.remote_addr, self.remote_port)
+
+    def sendall(self, msg):
+        if not self._sock:
+            self.connect()
+        self._sock.sendall(msg)
         
+    def recv(self, len):
+        return self._sock.recv(len)
+
     def _connect(self):
         '''Create TCP socket. The host is random one of host_tuple.'''
-        self.remote_addr = random.choice(self.host_tuple)
+        self.remote_addr, self.remote_port = random.choice(self.host_tuple)
         #print '[+] Connecting... remote: %s:%s' % (self.remote_addr, self.remote_port)
         #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #sock.settimeout(self.timeout)
@@ -62,7 +70,7 @@ class Connection(object):
         try:
             self._sock.close()
         except socket.error, e:
-            raise ConnectionError(self._errormessage(e))
+            pass
         self._sock = None
 
     def get_sock(self):
@@ -97,7 +105,7 @@ class ConnectionPool(object):
     def _check_pid(self):
         if self.pid != os.getpid():
             self.destroy()
-            self.__init__(self.conn_class, self.max_conn, **self.conn_kwargs)
+            self.__init__(self.pool_name, self.conn_class, self.max_conn, **self.conn_kwargs)
 
     def make_conn(self):
         '''Create a new connection.'''

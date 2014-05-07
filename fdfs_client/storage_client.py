@@ -116,8 +116,7 @@ class Storage_client(object):
     def __init__(self, *kwargs):
         conn_kwargs = {
             'name'       : 'Storage Pool',
-            'host_tuple' : (kwargs[0],),
-            'port'       : kwargs[1],
+            'host_tuple' : ((kwargs[0],kwargs[1]),),
             'timeout'    : kwargs[2]
         }
         self.pool = ConnectionPool(**conn_kwargs)
@@ -141,8 +140,7 @@ class Storage_client(object):
         self.pool.destroy()
         conn_kwargs = {
             'name'       : 'Storage_pool',
-            'host_tuple' : (new_store_serv.ip_addr,),
-            'port'       : new_store_serv.port,
+            'host_tuple' : ((new_store_serv.ip_addr,new_store_serv.port),),
             'timeout'    : timeout
         }
         self.pool = ConnectionPool(**conn_kwargs)
