@@ -96,7 +96,7 @@ def tcp_recv_file(conn, local_filename, file_size, buffer_size = 1024):
                     file_buffer, recv_size = tcp_recv_response(conn, remain_bytes, \
                                                                buffer_size)
                 f.write(file_buffer)
-                remain_bytes -= buffer_size
+                remain_bytes -= recv_size
                 total_file_size += recv_size
                 flush_size += recv_size
                 if flush_size >= 4096:
