@@ -26,9 +26,8 @@ def get_tracker_conf(conf_path = 'client.conf'):
         tracker_ip_list = []
         for tr in tracker_list:
             tracker_ip, tracker_port = tr.split(':')
-            tracker_ip_list.append(tracker_ip)
+            tracker_ip_list.append((tracker_ip, tracker_port))
         tracker['host_tuple'] = tuple(tracker_ip_list)
-        tracker['port']       = int(tracker_port)
         tracker['timeout']    = timeout
         tracker['name']       = 'Tracker Pool'
     except:
@@ -47,6 +46,7 @@ class Fdfs_client(object):
         self.trackers = get_tracker_conf(conf_path)
         self.tracker_pool = poolclass(**self.trackers)
         self.timeout  = self.trackers['timeout']
+        self.storages = {}
         return None
 
     def __del__(self):
@@ -55,6 +55,13 @@ class Fdfs_client(object):
             self.pool = None
         except:
             pass
+
+    def get_storage(self, store_serv):
+        store = self.storages.get((store_serv.ip_addr, store_serv.port), None)
+        if store is None:
+            store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
+            self.storages[(store_serv.ip_addr, store_serv.port)] = store
+        return store
 
     def upload_by_filename(self, filename, meta_dict = None):
         '''
@@ -81,8 +88,7 @@ class Fdfs_client(object):
             raise DataError(errmsg + '(uploading)')
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_stor_without_group()
-        store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
-        return store.storage_upload_by_filename(tc, store_serv, filename, meta_dict)
+        return self.get_storage(store_serv).storage_upload_by_filename(tc, store_serv, filename, meta_dict)
 
     def upload_by_file(self, filename, meta_dict = None):
         isfile, errmsg = fdfs_check_file(filename)
@@ -90,8 +96,7 @@ class Fdfs_client(object):
             raise DataError(errmsg + '(uploading)')
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_stor_without_group()
-        store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
-        return store.storage_upload_by_file(tc, store_serv, filename, meta_dict)
+        return self.get_storage(store_serv).storage_upload_by_file(tc, store_serv, filename, meta_dict)
 
     def upload_by_buffer(self, filebuffer, file_ext_name = None, meta_dict = None):
         '''
@@ -118,8 +123,7 @@ class Fdfs_client(object):
             raise DataError('[-] Error: argument filebuffer can not be null.')
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_stor_without_group()
-        store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
-        return store.storage_upload_by_buffer(tc, store_serv, filebuffer, \
+        return self.get_storage(store_serv).storage_upload_by_buffer(tc, store_serv, filebuffer, \
                                               file_ext_name, meta_dict)
 
     def upload_slave_by_filename(self, filename, remote_file_id, prefix_name, \
@@ -155,7 +159,7 @@ class Fdfs_client(object):
         group_name, remote_filename = tmp
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_stor_with_group(group_name)
-        store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
+        store = self.get_storage(store_serv)
         try:
             ret_dict = store.storage_upload_slave_by_filename(tc, store_serv, filename, \
                                                           prefix_name, remote_filename, \
@@ -198,7 +202,7 @@ class Fdfs_client(object):
         group_name, remote_filename = tmp
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_stor_with_group(group_name)
-        store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
+        store = self.get_storage(store_serv)
         try:
             ret_dict = store.storage_upload_slave_by_file(tc, store_serv, filename, \
                                                           prefix_name, remote_filename, \
@@ -237,7 +241,7 @@ class Fdfs_client(object):
         group_name, remote_filename = tmp
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_update(group_name, remote_filename)
-        store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
+        store = self.get_storage(store_serv)
         return store.storage_upload_slave_by_buffer(tc, store_serv, filebuffer, \
                                                     remote_filename, meta_dict, \
                                                     file_ext_name)
@@ -267,7 +271,7 @@ class Fdfs_client(object):
             raise DataError(errmsg + '(uploading appender)')
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_stor_without_group()
-        store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
+        store = self.get_storage(store_serv)
         return store.storage_upload_appender_by_filename(tc, store_serv, \
                                                          local_filename, meta_dict)
 
@@ -296,7 +300,7 @@ class Fdfs_client(object):
             raise DataError(errmsg + '(uploading appender)')
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_stor_without_group()
-        store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
+        store = self.get_storage(store_serv)
         return store.storage_upload_appender_by_file(tc, store_serv, \
                                                          local_filename, meta_dict)
 
@@ -320,7 +324,7 @@ class Fdfs_client(object):
             raise DataError('[-] Error: argument filebuffer can not be null.')
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_stor_without_group()
-        store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
+        store = self.get_storage(store_serv)
         return store.storage_upload_appender_by_buffer(tc, store_serv, \
                                                        filebuffer, meta_dict, \
                                                        file_ext_name)
@@ -338,7 +342,7 @@ class Fdfs_client(object):
         group_name, remote_filename = tmp
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_update(group_name, remote_filename)
-        store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
+        store = self.get_storage(store_serv)
         return store.storage_delete_file(tc, store_serv, remote_filename)
 
     def download_to_file(self, local_filename, remote_file_id, offset = 0, down_bytes = 0):

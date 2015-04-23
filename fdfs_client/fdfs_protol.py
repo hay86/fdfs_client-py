@@ -98,6 +98,7 @@ FDFS_RECORD_SEPERATOR      =	'\x01'
 FDFS_FIELD_SEPERATOR       =	'\x02'
 
 #common constants
+FDFS_STORAGE_ID_MAX_SIZE   =    16
 FDFS_GROUP_NAME_MAX_LEN	   =    16
 IP_ADDRESS_SIZE            =    16
 FDFS_PROTO_PKG_LEN_SIZE	   =	8
@@ -194,7 +195,7 @@ class Tracker_header(object):
         '''Send Tracker header to server.'''
         header = self._pack(self.pkg_len, self.cmd, self.status)
         try:
-            conn._sock.sendall(header)
+            conn.sendall(header)
         except (socket.error, socket.timeout), e:
             raise ConnectionError('[-] Error: while writting to socket: %s' \
                                   % (e.args,))
@@ -204,10 +205,12 @@ class Tracker_header(object):
            if sucess, class member (pkg_len, cmd, status) is response.
         '''
         try:
-            header = conn._sock.recv(self.header_len())
+            header = conn.recv(self.header_len())
         except (socket.error, socket.timeout), e:
             raise ConnectionError('[-] Error: while reading from socket: %s' \
                                   % (e.args,))
+        if not header:
+            raise ConnectionError("Socket closed on remote end")
         self._unpack(header)
 
 def fdfs_pack_metadata(meta_dict):
