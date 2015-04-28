@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # filename: exceptions.py
 
-'''Core exceptions raised by fdfs client'''
+"""Core exceptions raised by fdfs client"""
 
 class FDFSError(Exception):
     pass
