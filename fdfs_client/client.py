@@ -63,6 +63,21 @@ class Fdfs_client(object):
             self.storages[(store_serv.ip_addr, store_serv.port)] = store
         return store
 
+    def get_store_serv(self, remote_file_id):
+        '''
+        Get store server info by remote_file_id.
+        @author: LeoTse
+        @param remote_file_id: string, file_id of file that is on storage server
+        @return Storage_server object
+        '''
+        tmp = split_remote_fileid(remote_file_id)
+        if not tmp:
+            raise DataError('[-] Error: remote_file_id is invalid.(in delete file)')
+        group_name, remote_filename = tmp
+        tc = Tracker_client(self.tracker_pool)
+        store_serv = tc.tracker_query_storage_update(group_name, remote_filename)
+        return store_serv
+
     def upload_by_filename(self, filename, meta_dict = None):
         '''
         Upload a file to Storage server.
