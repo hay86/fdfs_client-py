@@ -23,7 +23,7 @@ class Connection(object):
     def __init__(self, **conn_kwargs):
         self.pid = os.getpid()
         self.host_tuple = conn_kwargs['host_tuple']
-        self.remote_port = None
+        self.remote_port = conn_kwargs['port']
         self.remote_addr = None
         self.timeout = conn_kwargs['timeout']
         self._sock = None
@@ -43,25 +43,17 @@ class Connection(object):
         except socket.error as e:
             raise ConnectionError(self._errormessage(e))
         self._sock = sock
-        # print '[+] Create a connection success.'
-        # print '\tLocal address is %s:%s.' % self._sock.getsockname()
-        # print '\tRemote address is %s:%s' % (self.remote_addr, self.remote_port)
-
-    def sendall(self, msg):
-        if not self._sock:
-            self.connect()
-        self._sock.sendall(msg)
-
-    def recv(self, len):
-        return self._sock.recv(len)
-
+        #print '[+] Create a connection success.'
+        #print '\tLocal address is %s:%s.' % self._sock.getsockname()
+        #print '\tRemote address is %s:%s' % (self.remote_addr, self.remote_port)
+        
     def _connect(self):
-        """Create TCP socket. The host is random one of host_tuple."""
-        self.remote_addr, self.remote_port = random.choice(self.host_tuple)
-        # print '[+] Connecting... remote: %s:%s' % (self.remote_addr, self.remote_port)
-        # sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # sock.settimeout(self.timeout)
-        sock = socket.create_connection((self.remote_addr, self.remote_port), self.timeout)
+        '''Create TCP socket. The host is random one of host_tuple.'''
+        self.remote_addr = random.choice(self.host_tuple)
+        #print '[+] Connecting... remote: %s:%s' % (self.remote_addr, self.remote_port)
+        #sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #sock.settimeout(self.timeout)
+        sock = socket.create_connection((self.remote_addr, self.remote_port),self.timeout)
         return sock
 
     def disconnect(self):
@@ -70,8 +62,8 @@ class Connection(object):
             return
         try:
             self._sock.close()
-        except socket.error as e:
-            pass
+        except socket.error, e:
+            raise ConnectionError(self._errormessage(e))
         self._sock = None
 
     def get_sock(self):
@@ -109,7 +101,7 @@ class ConnectionPool(object):
     def _check_pid(self):
         if self.pid != os.getpid():
             self.destroy()
-            self.__init__(self.pool_name, self.conn_class, self.max_conn, **self.conn_kwargs)
+            self.__init__(self.conn_class, self.max_conn, **self.conn_kwargs)
 
     def make_conn(self):
         """Create a new connection."""
@@ -170,28 +162,33 @@ class ConnectionPool(object):
 
 # end ConnectionPool class
 
-def tcp_recv_response(conn, bytes_size, buffer_size=4096):
-    """Receive response from server.
+def tcp_recv_response(conn, bytes_size, buffer_size = 1024):
+    '''Receive response from server.
         It is not include tracker header.
         arguments:
         @conn: connection
         @bytes_size: int, will be received byte_stream size
         @buffer_size: int, receive buffer size
         @Return: tuple,(response, received_size)
-    """
-    recv_buff = []
+    '''
+    response = ''
     total_size = 0
+    total_bytes_size = bytes_size
     try:
-        while bytes_size > 0:
+        while 1:
+            if total_bytes_size - total_size <= buffer_size:
+                resp = conn._sock.recv(buffer_size)
+                response += resp
+                total_size += len(resp)
+                break
             resp = conn._sock.recv(buffer_size)
-            recv_buff.append(resp)
+            response += resp
             total_size += len(resp)
-            bytes_size -= len(resp)
-    except (socket.error, socket.timeout) as e:
-        raise ConnectionError('[-] Error: while reading from socket: (%s)' \
-                              % e.args)
-    return b''.join(recv_buff), total_size
-
+            
+    except (socket.error, socket.timeout), e:
+            raise ConnectionError('[-] Error: while reading from socket: (%s)' \
+                                    % e.args)
+    return (response, total_size)
 
 def tcp_send_data(conn, bytes_stream):
     """Send buffer to server.

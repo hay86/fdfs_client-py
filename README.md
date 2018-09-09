@@ -1,6 +1,6 @@
 # Fdfs_client py
 
-The Python interface to the Fastdfs Ver 4.06.
+The Python interface to the Fastdfs Ver 4.06.1.
 
 ## Installation
 
@@ -25,7 +25,8 @@ Class Fdfs_client:
 
 member functions:
 
-* upload_by_filename(self, filename, meta_dict = None)
+```
+upload_by_filename(self, filename, meta_dict = None)
   '''
   Upload a file to Storage server.
   arguments:
@@ -45,7 +46,7 @@ member functions:
             'Storage IP'      : storage_ip
         } if success else None
 
-* upload_by_buffer(self, filebuffer, file_ext_name = None, meta_dict = None)
+upload_by_buffer(self, filebuffer, file_ext_name = None, meta_dict = None)
   '''
   Upload a buffer to Storage server.
   arguments:
@@ -67,7 +68,7 @@ member functions:
         }
   '''
 
-* upload_slave_by_filename(self, filename, remote_file_id, prefix_name, \
+upload_slave_by_filename(self, filename, remote_file_id, prefix_name, \
                                  meta_dict = None)
   '''
   Upload slave file to Storage server.
@@ -90,7 +91,7 @@ member functions:
        }
   '''
 
-* upload_slave_by_buffer(self, filebuffer, remote_file_id, \
+upload_slave_by_buffer(self, filebuffer, remote_file_id, \
                                meta_dict = None, file_ext_name = None)
   '''
   Upload slave file by buffer
@@ -112,7 +113,7 @@ member functions:
        }
   '''
 
-* upload_appender_by_filename(self, local_filename, meta_dict = None)
+upload_appender_by_filename(self, local_filename, meta_dict = None)
   '''
   Upload an appender file by filename.
   arguments:
@@ -133,7 +134,7 @@ member functions:
 	   }
   '''
 
-* upload_appender_by_buffer(self, filebuffer, file_ext_name = None, meta_dict = None)
+upload_appender_by_buffer(self, filebuffer, file_ext_name = None, meta_dict = None)
   '''
   Upload a buffer to Storage server.
   arguments:
@@ -150,7 +151,7 @@ member functions:
        }
   '''
 
-* delete_file(self, remote_file_id)
+delete_file(self, remote_file_id)
   '''
   Delete a file from Storage server.
   arguments:
@@ -158,7 +159,7 @@ member functions:
        @return tuple ('Delete file successed.', remote_file_id, storage_ip)
   '''
 
-* download_to_file(self, local_filename, remote_file_id, offset = 0, down_bytes = 0)
+download_to_file(self, local_filename, remote_file_id, offset = 0, down_bytes = 0)
   '''
   Download a file from Storage server.
   arguments:
@@ -174,7 +175,7 @@ member functions:
        }
   '''
 
-* download_to_buffer(self, remote_file_id, offset = 0, down_bytes = 0)
+download_to_buffer(self, remote_file_id, offset = 0, down_bytes = 0)
   '''
   Download a file from Storage server and store in buffer.
   arguments:
@@ -189,7 +190,7 @@ member functions:
        }
   '''
 
-* list_one_group(self, group_name)
+list_one_group(self, group_name)
   '''
   List one group information.
   arguments:
@@ -197,7 +198,7 @@ member functions:
        @return Group_info,  instance
   '''
 
-* list_all_groups(self)
+list_all_groups(self)
   '''
   List all group information.
        @return dictionary {
@@ -206,7 +207,7 @@ member functions:
        }
   '''
 
-* list_servers(self, group_name, storage_ip = None)
+list_servers(self, group_name, storage_ip = None)
   '''
   List all storage servers information in a group
   arguments:
@@ -217,7 +218,7 @@ member functions:
        }
   '''
 
-* get_meta_data(self, remote_file_id)
+get_meta_data(self, remote_file_id)
   '''
   Get meta data of remote file.
   arguments:
@@ -225,7 +226,7 @@ member functions:
        @return dictionary, meta data
   '''
 
-* set_meta_data(self, remote_file_id, \
+set_meta_data(self, remote_file_id, \
                       meta_dict, op_flag = STORAGE_SET_METADATA_FLAG_OVERWRITE)
   '''
   Set meta data of remote file.
@@ -239,7 +240,7 @@ member functions:
        }
   '''
 
-* append_by_filename(self, local_filename, remote_fileid)
+append_by_filename(self, local_filename, remote_fileid)
   '''
   Append a file of Storage server
   arguments:
@@ -255,7 +256,7 @@ member functions:
        }
   '''
 
-* append_by_buffer(self, file_buffer, remote_fileid)
+append_by_buffer(self, file_buffer, remote_fileid)
   '''
   Append a file of Storage server
   arguments:
@@ -271,7 +272,7 @@ member functions:
        }
   '''
 
-* truncate_file(self, truncated_filesize, appender_fileid)
+truncate_file(self, truncated_filesize, appender_fileid)
   '''
   Truncate file in Storage server.
   arguments:
@@ -283,7 +284,7 @@ member functions:
        }
   '''
 	   
-* modify_by_filename(self, filename, appender_fileid, offset = 0)
+modify_by_filename(self, filename, appender_fileid, offset = 0)
   '''
   Modify a file in Storage server by filename.
   arguments:
@@ -296,7 +297,7 @@ member functions:
        }
   '''
 
-* modify_by_buffer(self, filebuffer, appender_fileid, offset = 0)
+modify_by_buffer(self, filebuffer, appender_fileid, offset = 0)
   '''
   Modify a file in Storage server by buffer.
   arguments:
@@ -308,7 +309,7 @@ member functions:
            'Storage IP' : storage_ip
        }
   '''
-
+```
 ### Connection Pools
 
 Behind the scenes, fdfs_client-py uses a connection pool to manage connections to
@@ -333,4 +334,3 @@ Special thanks to:
 
 * Andy Mccurdy, author of redis-py, referenced his code.
 * g.rodola, author sendfile module for python, g.rodola@gmail.com
-
