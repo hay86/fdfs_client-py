@@ -121,7 +121,7 @@ class ConnectionPool(object):
                 num_try -= 1
                 conn_instance = None
         if num_try <= 0:
-            raise ConnectionError("Fail to connect with Fdfs-server after trying %d times" % num_try)
+            raise ConnectionError("Fail to connect with Fdfs-server after trying 3 times")
         return conn_instance
 
     def get_connection(self):
