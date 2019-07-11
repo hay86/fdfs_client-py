@@ -62,7 +62,7 @@ class Connection(object):
             return
         try:
             self._sock.close()
-        except socket.error, e:
+        except socket.error as e:
             raise ConnectionError(self._errormessage(e))
         self._sock = None
 
