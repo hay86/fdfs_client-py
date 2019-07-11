@@ -107,11 +107,11 @@ class ConnectionPool(object):
         """Create a new connection."""
         if self._conns_created >= self.max_conn:
             raise ConnectionError('[-] Error: Too many connections.')
-        num_try = 10
+        num_try = 3
         while True:
             try:
                 if num_try <= 0:
-                    sys.exit()
+                    break
                 conn_instance = self.conn_class(**self.conn_kwargs)
                 conn_instance.connect()
                 self._conns_created += 1
@@ -120,6 +120,8 @@ class ConnectionPool(object):
                 print(e)
                 num_try -= 1
                 conn_instance = None
+        if num_try <= 0:
+            raise ConnectionError("Fail to connect with Fdfs-server after trying %d times" % num_try)
         return conn_instance
 
     def get_connection(self):
