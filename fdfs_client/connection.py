@@ -185,7 +185,7 @@ def tcp_recv_response(conn, bytes_size, buffer_size = 1024):
             response += resp
             total_size += len(resp)
             
-    except (socket.error, socket.timeout), e:
+    except (socket.error, socket.timeout) as e:
             raise ConnectionError('[-] Error: while reading from socket: (%s)' \
                                     % e.args)
     return (response, total_size)
