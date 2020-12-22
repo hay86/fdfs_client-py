@@ -104,7 +104,36 @@ class Fdfs_client(object):
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_stor_without_group()
         return self.get_storage(store_serv).storage_upload_by_filename(tc, store_serv, filename, meta_dict)
-
+      
+    def upload_by_filename_with_group(self, filename, group_name, meta_dict = None):
+        """
+        Upload a file to Storage server.
+        arguments:
+        @filename: string, name of file that will be uploaded
+        @group_name: string
+        @meta_dict: dictionary e.g.:{
+            'ext_name'  : 'jpg',
+            'file_size' : '10240B',
+            'width'     : '160px',
+            'hight'     : '80px'
+        } meta_dict can be null
+        @return dict {
+            'Group name'      : group_name,
+            'Remote file_id'  : remote_file_id,
+            'Status'          : 'Upload successed.',
+            'Local file name' : local_file_name,
+            'Uploaded size'   : upload_size,
+            'Storage IP'      : storage_ip
+        } if success else None
+        """
+        group_name = group_name.encode('utf-8')
+        isfile, errmsg = fdfs_check_file(filename)
+        if not isfile:
+            raise DataError(errmsg + '(uploading)')
+        tc = Tracker_client(self.tracker_pool)
+        store_serv = tc.tracker_query_storage_stor_with_group(group_name)
+        return self.get_storage(store_serv).storage_upload_by_filename(tc, store_serv, filename, meta_dict)
+      
     def upload_by_file(self, filename, meta_dict=None):
         isfile, errmsg = fdfs_check_file(filename)
         if not isfile:
