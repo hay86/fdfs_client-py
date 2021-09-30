@@ -393,7 +393,7 @@ class Fdfs_client(object):
         """
         Download a file from Storage server.
         arguments:
-        @local_filename: string, local name of file 
+        @local_filename: string, local name of file
         @remote_file_id: string, file_id of file that is on storage server
         @offset: long
         @downbytes: long
@@ -408,14 +408,12 @@ class Fdfs_client(object):
         if not tmp:
             raise DataError('[-] Error: remote_file_id is invalid.(in download file)')
         group_name, remote_filename = tmp
-        if not offset:
-            file_offset = offset
         if not down_bytes:
             download_bytes = down_bytes
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_fetch(group_name, remote_filename)
         store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
-        return store.storage_download_to_file(tc, store_serv, local_filename, file_offset, download_bytes,
+        return store.storage_download_to_file(tc, store_serv, local_filename, offset, download_bytes,
                                               remote_filename)
 
     def download_to_buffer(self, remote_file_id, offset=0, down_bytes=0):
@@ -436,8 +434,6 @@ class Fdfs_client(object):
         if not tmp:
             raise DataError('[-] Error: remote_file_id is invalid.(in download file)')
         group_name, remote_filename = tmp
-        if not offset:
-            file_offset = offset
         if not down_bytes:
             download_bytes = down_bytes
         tc = Tracker_client(self.tracker_pool)
@@ -445,7 +441,7 @@ class Fdfs_client(object):
         store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
         file_buffer = None
         return store.storage_download_to_buffer(tc, store_serv, file_buffer, \
-                                                file_offset, download_bytes, \
+                                                offset, download_bytes, \
                                                 remote_filename)
 
     def list_one_group(self, group_name):
@@ -612,14 +608,10 @@ class Fdfs_client(object):
         if not tmp:
             raise DataError('[-] Error: remote_fileid is invalid.(modify)')
         group_name, appender_filename = tmp
-        if not offset:
-            file_offset = offset
-        else:
-            file_offset = 0
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_update(group_name, appender_filename)
         store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
-        return store.storage_modify_by_filename(tc, store_serv, filename, file_offset, \
+        return store.storage_modify_by_filename(tc, store_serv, filename, offset, \
                                                 filesize, appender_filename)
 
     def modify_by_file(self, filename, appender_fileid, offset=0):
@@ -642,14 +634,10 @@ class Fdfs_client(object):
         if not tmp:
             raise DataError('[-] Error: remote_fileid is invalid.(modify)')
         group_name, appender_filename = tmp
-        if not offset:
-            file_offset = offset
-        else:
-            file_offset = 0
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_update(group_name, appender_filename)
         store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
-        return store.storage_modify_by_file(tc, store_serv, filename, file_offset, \
+        return store.storage_modify_by_file(tc, store_serv, filename, offset, \
                                             filesize, appender_filename)
 
     def modify_by_buffer(self, filebuffer, appender_fileid, offset=0):
@@ -671,12 +659,8 @@ class Fdfs_client(object):
         if not tmp:
             raise DataError('[-] Error: remote_fileid is invalid.(modify)')
         group_name, appender_filename = tmp
-        if not offset:
-            file_offset = offset
-        else:
-            file_offset = 0
         tc = Tracker_client(self.tracker_pool)
         store_serv = tc.tracker_query_storage_update(group_name, appender_filename)
         store = Storage_client(store_serv.ip_addr, store_serv.port, self.timeout)
-        return store.storage_modify_by_buffer(tc, store_serv, filebuffer, file_offset, \
+        return store.storage_modify_by_buffer(tc, store_serv, filebuffer, offset, \
                                               filesize, appender_filename)
